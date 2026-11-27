@@ -14,7 +14,12 @@ class HomeController extends GetxController {
   final ProfileRepository _profile;
 
   late final List<Project> featuredProjects = _projects.featured();
-  late final List<SkillGroup> skillGroups = _skills.groups();
+  late final Project? highlight = _projects.highlight();
+
+  late final List<SkillGroup> skillGroups = _skills
+      .groups()
+      .take(4)
+      .toList(growable: false);
 
   String get tagline => _profile.tagline;
 

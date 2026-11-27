@@ -6,6 +6,7 @@ import '../../../core/constants/spacing.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../data/models/project.dart';
+import '../../../shared/widget/bullet_list.dart';
 import '../../../shared/widget/content_box.dart';
 import '../../../shared/widget/framed_image.dart';
 import '../../../shared/widget/glass_card.dart';
@@ -27,11 +28,15 @@ class ProjectDetailView extends GetView<ProjectDetailController> {
     final wide = !Responsive.isMobile(context);
 
     final sections = <(String, String)>[
-      ('The problem', project.problem),
-      ('My role', project.role),
-      ('A decision worth explaining', project.decision),
-      ('How it turned out', project.outcome),
+      if (project.problem != null) ('The problem', project.problem!),
+      if (project.role != null) ('My role', project.role!),
+      if (project.decision != null)
+        ('A decision worth explaining', project.decision!),
+      if (project.outcome != null) ('How it turned out', project.outcome!),
     ];
+
+    final hasSidebar = project.stack.isNotEmpty || project.links.isNotEmpty;
+    final hasStory = sections.isNotEmpty || project.highlights.isNotEmpty;
 
     final story = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,18 +52,34 @@ class ProjectDetailView extends GetView<ProjectDetailController> {
                   const SizedBox(height: Space.xs),
                   Text(
                     body,
-                    style: text.bodyLarge?.copyWith(
-                      color: context.tokens.mutedText,
-                    ),
+                    style: text.bodyLarge?.copyWith(color: context.tokens.mutedText),
                   ),
                 ],
               ),
             ),
           ),
+        if (project.highlights.isNotEmpty)
+          Reveal(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('What I worked on', style: text.headlineSmall),
+                const SizedBox(height: Space.sm),
+                BulletList(items: project.highlights),
+              ],
+            ),
+          ),
+        if (!hasStory)
+          Reveal(
+            child: GlassCard(
+              child: Text(
+                'More details will be shared here when the time is right.',
+                style: text.bodyLarge,
+              ),
+            ),
+          ),
       ],
     );
-
-    final sidebar = _Sidebar(project: project, onOpen: controller.openLink);
 
     return PageShell(
       route: AppRoutes.projectPath(project.id),
@@ -100,14 +121,22 @@ class ProjectDetailView extends GetView<ProjectDetailController> {
                       constraints: const BoxConstraints(maxWidth: 680),
                       child: Text(
                         project.summary,
-                        style: text.bodyLarge?.copyWith(
-                          color: context.tokens.mutedText,
-                        ),
+                        style: text.bodyLarge?.copyWith(color: context.tokens.mutedText),
                       ),
                     ),
-                    if (project.isPlaceholder) ...<Widget>[
+                    if (project.isPlaceholder ||
+                        project.badge != null ||
+                        project.status != null) ...<Widget>[
                       const SizedBox(height: Space.sm),
-                      const TagChip('Placeholder'),
+                      Wrap(
+                        spacing: Space.xs,
+                        runSpacing: Space.xs,
+                        children: <Widget>[
+                          if (project.isPlaceholder) const TagChip('Placeholder'),
+                          if (project.badge != null) TagChip(project.badge!),
+                          if (project.status != null) TagChip(project.status!),
+                        ],
+                      ),
                     ],
                   ],
                 ),
@@ -121,28 +150,33 @@ class ProjectDetailView extends GetView<ProjectDetailController> {
                     aspectRatio: wide ? 16 / 8 : 4 / 3,
                     child: AppImage(
                       asset: project.imageAsset,
-                      semanticLabel: 'Screenshot of ${project.title}',
+                      semanticLabel: 'Preview of ${project.title}',
                       cacheWidth: 1600,
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: Space.xl),
-              if (wide)
+              if (wide && hasSidebar)
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Expanded(flex: 7, child: story),
                     const SizedBox(width: Space.xl),
-                    Expanded(flex: 3, child: sidebar),
+                    Expanded(
+                      flex: 3,
+                      child: _Sidebar(project: project, onOpen: controller.openLink),
+                    ),
                   ],
                 )
               else
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    sidebar,
-                    const SizedBox(height: Space.lg),
+                    if (hasSidebar) ...<Widget>[
+                      _Sidebar(project: project, onOpen: controller.openLink),
+                      const SizedBox(height: Space.lg),
+                    ],
                     story,
                   ],
                 ),
@@ -162,8 +196,7 @@ class _Sidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = context.type;
-    final labelStyle = text.labelMedium?.copyWith(
+    final labelStyle = context.type.labelMedium?.copyWith(
       color: context.tokens.linkText,
       letterSpacing: 2,
     );
@@ -173,21 +206,20 @@ class _Sidebar extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text('BUILT WITH', style: labelStyle),
-            const SizedBox(height: Space.xs),
-            Wrap(
-              spacing: Space.xs,
-              runSpacing: Space.xs,
-              children: <Widget>[
-                for (final tech in project.stack) TagChip(tech),
-              ],
-            ),
-            const SizedBox(height: Space.md),
-            Text('LINKS', style: labelStyle),
-            const SizedBox(height: Space.xs),
-            if (project.links.isEmpty)
-              Text('Links will be added soon.', style: text.bodySmall)
-            else
+            if (project.stack.isNotEmpty) ...<Widget>[
+              Text('BUILT WITH', style: labelStyle),
+              const SizedBox(height: Space.xs),
+              Wrap(
+                spacing: Space.xs,
+                runSpacing: Space.xs,
+                children: <Widget>[for (final tech in project.stack) TagChip(tech)],
+              ),
+            ],
+            if (project.stack.isNotEmpty && project.links.isNotEmpty)
+              const SizedBox(height: Space.md),
+            if (project.links.isNotEmpty) ...<Widget>[
+              Text('LINKS', style: labelStyle),
+              const SizedBox(height: Space.xs),
               for (final link in project.links)
                 Padding(
                   padding: const EdgeInsets.only(bottom: Space.xs),
@@ -197,6 +229,7 @@ class _Sidebar extends StatelessWidget {
                     label: Text(link.label),
                   ),
                 ),
+            ],
           ],
         ),
       ),
@@ -223,9 +256,7 @@ class _MissingProject extends StatelessWidget {
               const SizedBox(height: Space.sm),
               Text(
                 'It may have been renamed. The full list is one click away.',
-                style: text.bodyLarge?.copyWith(
-                  color: context.tokens.mutedText,
-                ),
+                style: text.bodyLarge?.copyWith(color: context.tokens.mutedText),
               ),
               const SizedBox(height: Space.md),
               FilledButton(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/spacing.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../data/models/timeline_entry.dart';
+import '../../../shared/widget/bullet_list.dart';
 import '../../../shared/widget/reveal.dart';
 import '../../../shared/widget/tag_chip.dart';
 
@@ -14,7 +15,7 @@ class Timeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 720),
+      constraints: const BoxConstraints(maxWidth: 760),
       child: Column(
         children: <Widget>[
           for (var i = 0; i < entries.length; i++)
@@ -101,13 +102,17 @@ class _TimelineRow extends StatelessWidget {
                   const SizedBox(height: Space.xxs),
                   Text(entry.title, style: text.titleLarge),
                   Text(entry.place, style: text.bodySmall),
-                  const SizedBox(height: Space.xs),
-                  Text(
-                    entry.note,
-                    style: text.bodyMedium?.copyWith(
-                      color: context.tokens.mutedText,
+                  if (entry.note != null) ...<Widget>[
+                    const SizedBox(height: Space.xs),
+                    Text(
+                      entry.note!,
+                      style: text.bodyMedium?.copyWith(color: context.tokens.mutedText),
                     ),
-                  ),
+                  ],
+                  if (entry.highlights.isNotEmpty) ...<Widget>[
+                    const SizedBox(height: Space.sm),
+                    BulletList(items: entry.highlights),
+                  ],
                   if (entry.isPlaceholder) ...<Widget>[
                     const SizedBox(height: Space.xs),
                     const TagChip('Placeholder'),
