@@ -25,7 +25,7 @@ class ContactView extends GetView<ContactController> {
   @override
   Widget build(BuildContext context) {
     final wide = !Responsive.isMobile(context);
-    final links = <SocialLink>[...LinksConfig.primary, ...LinksConfig.more];
+    final links = <SocialLink>[...LinksConfig.primary];
 
     final intro = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
