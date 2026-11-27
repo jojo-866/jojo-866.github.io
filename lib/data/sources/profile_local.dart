@@ -44,7 +44,7 @@ abstract final class ProfileLocal {
 
   static const List<TimelineEntry> timeline = <TimelineEntry>[
     TimelineEntry(
-      period: 'Dec 2024 – Nov 2026',
+      period: 'Dec.2024 – Nov.2026',
       title: 'Flutter Developer',
       place: 'Envision Tech Pvt. Ltd. · Kathmandu, Nepal',
       highlights: <String>[
@@ -77,7 +77,7 @@ abstract final class ProfileLocal {
       ],
     ),
     TimelineEntry(
-      period: 'Feb 2025 – May 2025',
+      period: 'Sept.2024 – Dec.2024',
       title: 'Flutter Intern',
       place: 'Envision Tech Pvt. Ltd. · Kathmandu, Nepal',
       highlights: <String>[
