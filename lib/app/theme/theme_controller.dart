@@ -1,30 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 
 class ThemeController extends GetxController {
-  static ThemeController get to => Get.find();
+  static ThemeController get to => Get.find<ThemeController>();
 
-  final _box = GetStorage();
-  static const _key = 'theme_mode';
-
-  final themeMode = ThemeMode.system.obs;
-
-  @override
-  void onInit() {
-    super.onInit();
-    // Load saved preference (defaults to system)
-    final saved = _box.read<String>(_key);
-    themeMode.value = ThemeMode.values.firstWhere(
-          (m) => m.name == saved,
-      orElse: () => ThemeMode.system,
-    );
-  }
+  final Rx<ThemeMode> themeMode = _initialMode().obs;
 
   bool get isDark => themeMode.value == ThemeMode.dark;
 
   void toggle() {
     themeMode.value = isDark ? ThemeMode.light : ThemeMode.dark;
-    _box.write(_key, themeMode.value.name);
+    Get.changeThemeMode(themeMode.value);
+  }
+
+
+
+  static ThemeMode _initialMode() {
+    final brightness =
+        WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    return brightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light;
   }
 }

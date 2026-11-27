@@ -1,148 +1,117 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-enum SnackbarType { success, error, warning, info }
+import '../../app/theme/theme_tokens.dart';
+import '../../core/constants/colors.dart';
+import '../../core/constants/durations.dart';
+
+enum SnackbarType { success, error, info, warning }
 
 class CustomSnackbar {
-  CustomSnackbar._();
+  const CustomSnackbar._();
+
+  static void success({required String title, required String message}) =>
+      show(type: SnackbarType.success, title: title, message: message);
+
+  static void error({required String title, required String message}) =>
+      show(type: SnackbarType.error, title: title, message: message);
+
+  static void info({required String title, required String message}) =>
+      show(type: SnackbarType.info, title: title, message: message);
+
+  static void warning({required String title, required String message}) =>
+      show(type: SnackbarType.warning, title: title, message: message);
 
   static void show({
     required SnackbarType type,
+    required String title,
     required String message,
-    String? title,
-    Function? onTap,
+    Duration duration = const Duration(seconds: 4),
   }) {
-    final config = _configFor(type);
-    const duration = Duration(seconds: 2);
-    const radius = 10.0;
+    final theme = Get.theme;
+    final tokens = theme.extension<SkyTokens>()!;
+    final dark = theme.brightness == Brightness.dark;
+    final accent = _accent(type, dark);
 
-    Get.rawSnackbar(
-      backgroundColor: config.bgColor,
-      borderColor: config.borderColor,
-      borderWidth: 2,
-      borderRadius: radius,
-      snackPosition: SnackPosition.TOP,
-      margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-      padding: EdgeInsets.zero,
-      duration: duration,
-      snackStyle: SnackStyle.FLOATING,
-      onTap: onTap != null ? (_) => onTap() : null,
-      messageText: ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(config.icon, color: config.iconColor, size: 36),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          title ?? config.title,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          message,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.black,
-                          ),
-                          softWrap: true,
-                          maxLines: 4,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 14),
-                      ],
+    final context = Get.context;
+    final reduceMotion =
+        context != null && MediaQuery.disableAnimationsOf(context);
+
+    final sideMargin = ((Get.width - 420) / 2).clamp(16.0, double.infinity);
+
+    Get.showSnackbar(
+      GetSnackBar(
+        snackPosition: SnackPosition.BOTTOM,
+        snackStyle: SnackStyle.FLOATING,
+        backgroundColor: tokens.surfaceRaised,
+        borderRadius: 20,
+        borderColor: accent.withValues(alpha: 0.35),
+        borderWidth: 1,
+        margin: EdgeInsets.fromLTRB(sideMargin, 0, sideMargin, 24),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+        boxShadows: <BoxShadow>[
+          BoxShadow(
+            color: tokens.shadow,
+            blurRadius: 28,
+            offset: const Offset(0, 12),
+          ),
+        ],
+        duration: duration,
+        animationDuration: reduceMotion
+            ? const Duration(milliseconds: 10)
+            : AppMotion.slow,
+        forwardAnimationCurve: Curves.easeOutCubic,
+        reverseAnimationCurve: Curves.easeInCubic,
+        isDismissible: true,
+        messageText: Semantics(
+          liveRegion: true,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: accent.withValues(alpha: 0.16),
+                ),
+                child: Icon(_icon(type), size: 20, color: accent),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(title, style: theme.textTheme.titleSmall),
+                    const SizedBox(height: 2),
+                    Text(
+                      message,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: tokens.mutedText,
+                        height: 1.45,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 1.0, end: 0.0),
-                duration: duration,
-                builder: (context, value, _) {
-                  return LinearProgressIndicator(
-                    value: value,
-                    minHeight: 3,
-                    backgroundColor: Colors.white.withOpacity(0.3),
-                    valueColor: AlwaysStoppedAnimation<Color>(config.borderColor),
-                  );
-                },
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  static _SnackConfig _configFor(SnackbarType type) {
-    switch (type) {
-      case SnackbarType.success:
-        return _SnackConfig(
-          title: 'Success',
-          bgColor: const Color(0xFFDCFCE7),
-          borderColor: const Color(0xFF55B938),
-          icon: Icons.check_circle,
-          iconColor: const Color(0xFF55B938),
-        );
-      case SnackbarType.error:
-        return _SnackConfig(
-          title: 'Error',
-          bgColor: const Color(0xFFFFE9E9),
-          borderColor: const Color(0xFFD65745),
-          icon: Icons.error,
-          iconColor: const Color(0xFFD65745),
-        );
-      case SnackbarType.warning:
-        return _SnackConfig(
-          title: 'Warning',
-          bgColor: const Color(0xFFFFF1BF),
-          borderColor: const Color(0xFFEAC645),
-          icon: Icons.warning,
-          iconColor: const Color(0xFFEAC645),
-        );
-      case SnackbarType.info:
-        return _SnackConfig(
-          title: 'Coming Soon',
-          bgColor: const Color(0xFFD8ECFF),
-          borderColor: const Color(0xFF5296D5),
-          icon: Icons.new_releases,
-          iconColor: const Color(0xFF5296D5),
-        );
-    }
-  }
-}
+  static Color _accent(SnackbarType type, bool dark) => switch (type) {
+    SnackbarType.success => dark ? SkyColors.successDark : SkyColors.success,
+    SnackbarType.error => dark ? SkyColors.errorDark : SkyColors.error,
+    SnackbarType.warning => dark ? SkyColors.warningDark : SkyColors.warning,
+    SnackbarType.info => dark ? primaryColor : secondaryColor,
+  };
 
-class _SnackConfig {
-  final String title;
-  final Color bgColor;
-  final Color borderColor;
-  final Color iconColor;
-  final IconData icon;
-
-  _SnackConfig({
-    required this.title,
-    required this.bgColor,
-    required this.borderColor,
-    required this.iconColor,
-    required this.icon,
-  });
+  static IconData _icon(SnackbarType type) => switch (type) {
+    SnackbarType.success => Icons.check_circle_outline_rounded,
+    SnackbarType.error => Icons.error_outline_rounded,
+    SnackbarType.warning => Icons.warning_amber_rounded,
+    SnackbarType.info => Icons.info_outline_rounded,
+  };
 }
