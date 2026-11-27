@@ -34,52 +34,10 @@ abstract final class LinksConfig {
   );
 
 
-  static const SocialLink facebookLink = SocialLink(
-    id: 'facebook',
-    label: 'Facebook',
-    url: 'https://www.facebook.com/joshuuuu1',
-    tooltip: 'Facebook profile (opens in a new tab)',
-    monogram: 'f',
-    iconAsset: AppAssets.iconFacebook,
-  );
-
-  static const SocialLink instagramLink = SocialLink(
-    id: 'instagram',
-    label: 'Instagram',
-    url: 'https://www.instagram.com/josae._/',
-    tooltip: 'Instagram profile (opens in a new tab)',
-    monogram: 'ig',
-    iconAsset: AppAssets.iconInstagram,
-  );
-
-  static const SocialLink tiktokLink = SocialLink(
-    id: 'tiktok',
-    label: 'TikTok',
-    url: 'https://www.tiktok.com/@josssssssssssssssh',
-    tooltip: 'TikTok profile (opens in a new tab)',
-    monogram: 'tt',
-    iconAsset: AppAssets.iconTiktok,
-  );
-
-  static const SocialLink twitterLink = SocialLink(
-    id: 'x',
-    label: 'X',
-    url: 'https://x.com/JyotsanaRegmi',
-    tooltip: 'X profile (opens in a new tab)',
-    monogram: 'X',
-    iconAsset: AppAssets.iconTwitter,
-  );
-
   static const List<SocialLink> primary = <SocialLink>[
     github,
     linkedin,
     emailLink,
   ];
 
-  static const List<SocialLink> more = <SocialLink>[
-    instagramLink,
-    facebookLink,
-    twitterLink,
-    tiktokLink,
-  ];
 }

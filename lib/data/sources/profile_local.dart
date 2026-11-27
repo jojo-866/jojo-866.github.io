@@ -42,7 +42,6 @@ abstract final class ProfileLocal {
     ),
   ];
 
-  // Ordered by end date, newest first.
   static const List<TimelineEntry> timeline = <TimelineEntry>[
     TimelineEntry(
       period: 'Dec 2024 – Nov 2026',
