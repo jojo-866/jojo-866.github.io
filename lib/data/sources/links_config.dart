@@ -6,14 +6,14 @@ import '../models/social_link.dart';
 abstract final class LinksConfig {
   static const String email = 'jyotsana.regmi3@gmail.com';
 
-  static const SocialLink github = SocialLink(
-    id: 'github',
-    label: 'GitHub',
-    url: 'https://github.com/josae86',
-    tooltip: 'GitHub profile (opens in a new tab)',
-    monogram: 'G',
-    iconAsset: AppAssets.iconGithub,
-  );
+  // static const SocialLink github = SocialLink(
+  //   id: 'github',
+  //   label: 'GitHub',
+  //   url: 'https://github.com/josae86',
+  //   tooltip: 'GitHub profile (opens in a new tab)',
+  //   monogram: 'G',
+  //   iconAsset: AppAssets.iconGithub,
+  // );
 
   static const SocialLink linkedin = SocialLink(
     id: 'linkedin',
@@ -35,7 +35,7 @@ abstract final class LinksConfig {
 
 
   static const List<SocialLink> primary = <SocialLink>[
-    github,
+    // github,
     linkedin,
     emailLink,
   ];
